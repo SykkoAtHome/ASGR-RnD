@@ -1,7 +1,9 @@
+import os
 import sys
-sys.path.append('../db')
-
+sys.path.append("../db")
 from db import c, conn
+
+
 
 from datetime import datetime
 
@@ -71,4 +73,4 @@ def set_user_location(user_id, game_id, pos_x, pos_y):
     c.execute(sql)
 
 
-print(get_user_name(1))
+#print(get_user_name(1))
