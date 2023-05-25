@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 import requests
 from itertools import product
 from io import BytesIO
+from mpl_toolkits.basemap import Basemap
 
 tile_limit = 100
 
@@ -42,6 +43,16 @@ def canvas_size(user_id, game_id, zoom):
     rows = (y1_tile - y0_tile)
     canvas_size = (columns * 256, rows * 256)
     aspect_ratio = canvas_size[0]/canvas_size[1]
+    canvas = Image.new("RGB", canvas_size)
+
+
+    # x, y = x0_tile * 256, y0_tile * 256
+    # canvas = canvas.crop((
+    #     int(x0 - x),  # left
+    #     int(y0 - y),  # top
+    #     int(x1 - x),  # right
+    #     int(y1 - y)))  # bottom
+    # print(canvas.size)
 
     return columns * 256, rows * 256, columns, rows, aspect_ratio, numberOfTiles
 
@@ -104,36 +115,33 @@ def map_canvas(user_id, game_id, zoom):
 
 
 def plot_points(user_id, game_id, zoom):
-    canvas_bg = canvas_size(user_id,game_id,zoom)  # width, height, columns, rows, aspect ratio
-    #dataframe = pd.DataFrame(data=user.location_data(user_id, game_id))
-    #top, bottom, right, left = set_bounding_box(dataframe)
+    canvas_bg = canvas_size(user_id, game_id, zoom)  # width, height, columns, rows, aspect ratio
+    pd.set_option('display.float_format', '{:.8f}'.format)
     locationData = user.location_data(user_id, game_id)  # Dictionary
-    latitudeData = []
-    longitudeData = []
-    conversionData = []
-    mercatorData = []
-    mercatorX = []
-    mercatorY = []
-    list_of_lists = [i for i in locationData.values()]
-    for latitude in list_of_lists[0]:
-        latitudeData.append(latitude)
-    for longitude in list_of_lists[1]:
-        longitudeData.append(longitude)
-    for lat, lon in zip(latitudeData, longitudeData):
-        pair = [lat,lon]
-        conversionData.append(pair)
-
-    for lat,lon in conversionData:
-        mercatorData.append(deg2num(lat,lon,zoom))
-    for mx, my in mercatorData:
-        mercatorX.append(mx)
-        mercatorY.append(my)
+    latitudeData = locationData['lat']
+    longitudeData = locationData['lon']
+    mercatorData = [deg2num(lat, lon, zoom) for lat, lon in zip(latitudeData, longitudeData)]
+    mercatorX = [mx for mx, _ in mercatorData]
+    mercatorY = [my for _, my in mercatorData]
     locationData["mx"] = mercatorX
     locationData["my"] = mercatorY
 
     dataframe = pd.DataFrame(data=locationData)
 
+    
+
+
+
+
+
+
+
+
+
+
+
 plot_points(1,1,18)
+
 
 # mapa = map_canvas(1,1,18)
 # plt.imshow(mapa)
