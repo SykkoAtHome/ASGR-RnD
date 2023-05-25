@@ -1,0 +1,5 @@
+user_location_data;user_id, game_id;Returns dictionary with keys: lat, lon, timestamp as string, user_id, game_id. Values as lists
+get_user_name;user_id;Returns Username
+get_display_name;user_id;Returns Displayname
+get_user_last_location;user_id, game_id; Returns list with latitude [0], longitude [1], timestamp as string [2]
+set_user_location;user_id, game_id, (float)latitude, (float)longitude;Saving user in-game location to database
