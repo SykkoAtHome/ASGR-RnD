@@ -11,11 +11,23 @@ def deg2num(latitude, longitude, zoom):
     return (xtile, ytile)
 
 
+def set_bounding_box(dataframe):
+    bbox_list = []
+    bbox_list.append(dataframe['lat'].max())
+    bbox_list.append(dataframe['lat'].min())
+    bbox_list.append(dataframe['lon'].max())
+    bbox_list.append(dataframe['lon'].min())
+    return bbox_list
+
+
+
+
 def map_canvas(user_id, game_id, zoom):
         # build dataframe from database
         dataframe = pd.DataFrame(data=user.location_data(user_id, game_id))
 
         # calculate min and max values for setting up the region
+
 
 
 
