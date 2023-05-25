@@ -7,7 +7,7 @@ set_location;user_id, game_id, (float)latitude, (float)longitude;Saving user in-
 
 
 map_canvas
-deg2num;(float)latitude, (float)longitude, (int)zoom;Converts latitude and longitude to Mercator format based on zoom level
+deg2num;(float)latitude, (float)longitude, (int)zoom;Converts latitude and longitude to Mercator format based on zoom level. Returns tuple of values
 set_bounding_box;pandas dataframe;Settings top, bottom, left and right boundaries from user in-game locations data. List order: top, bottom, right, left
 map_canvas;user_id, game_id, zoom;Returns RAW Map (PIL Image) from tiles (OpenStreetMap) based on user in-game locations data. Map is not cropped to fit location data.
 

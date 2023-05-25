@@ -3,10 +3,11 @@ from datetime import datetime
 
 
 def location_data(user_id, game_id):
-    userCheck = c.execute(f"SELECT exists (SELECT * from location_events WHERE user_id = {user_id}) AS extists;")
+    sql = c.execute(f"SELECT exists (SELECT * from location_events WHERE user_id = {user_id}) AS extists;")
     userCheck = c.fetchall()
-    gameCheck = c.execute(f"SELECT exists (SELECT * from location_events WHERE user_id = {game_id}) AS extists;")
+    sql = c.execute(f"SELECT exists (SELECT * from location_events WHERE user_id = {game_id}) AS extists;")
     gameCheck = c.fetchall()
+
 
     user_locations = {}
 
@@ -35,7 +36,7 @@ def location_data(user_id, game_id):
         for x in range(len(locationData)):
             game_list.append(game_id)
             user_locations["game_id"] = game_list
-        conn.close()
+
         return user_locations  # dictionary
     else:
         conn.close()
@@ -84,3 +85,5 @@ def set_location(user_id, game_id, latitude, longitude):
     sql = f"INSERT INTO location_events (user_id, game_id, event_time, latitude, longitude, event_type) VALUES ({user_id}, {game_id}, '{time}', {latitude}, {longitude}, 6);"
     c.execute(sql)
     conn.close()
+
+
