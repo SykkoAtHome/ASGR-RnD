@@ -42,7 +42,6 @@ def user_location_data(user_id, game_id):
         return "Either user_id or game_id does not exist."
 
 
-
 def get_user_name(user_id):
 
     sql = f"SELECT username FROM users WHERE user_id={user_id}"
@@ -80,10 +79,8 @@ def get_user_last_location(user_id, game_id):
     return last_location  # list
 
 
-def set_user_location(user_id, game_id, pos_x, pos_y):
+def set_user_location(user_id, game_id, latitude, longitude):
     time = datetime.now()
-    sql = f"INSERT INTO location_events (user_id, game_id, event_time, latitude, longitude, event_type) VALUES ({user_id}, {game_id}, '{time}', {pos_x}, {pos_y}, 6);"
+    sql = f"INSERT INTO location_events (user_id, game_id, event_time, latitude, longitude, event_type) VALUES ({user_id}, {game_id}, '{time}', {latitude}, {longitude}, 6);"
     c.execute(sql)
     conn.close()
-
-print(user_location_data(2,1))
