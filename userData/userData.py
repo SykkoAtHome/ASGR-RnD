@@ -2,7 +2,7 @@ from db import c, conn
 from datetime import datetime
 
 
-def user_location_data(user_id, game_id):
+def location_data(user_id, game_id):
     userCheck = c.execute(f"SELECT exists (SELECT * from location_events WHERE user_id = {user_id}) AS extists;")
     userCheck = c.fetchall()
     gameCheck = c.execute(f"SELECT exists (SELECT * from location_events WHERE user_id = {game_id}) AS extists;")
@@ -42,7 +42,7 @@ def user_location_data(user_id, game_id):
         return "Either user_id or game_id does not exist."
 
 
-def get_user_name(user_id):
+def get_name(user_id):
 
     sql = f"SELECT username FROM users WHERE user_id={user_id}"
     c.execute(sql)
@@ -65,7 +65,7 @@ def get_display_name(user_id):
             return str(displayname)
 
 
-def get_user_last_location(user_id, game_id):
+def get_last_location(user_id, game_id):
     sql = f"SELECT latitude, longitude, event_time from location_events WHERE user_id = {user_id} AND game_id = {game_id} ORDER BY event_time DESC LIMIT 1;"
     c.execute(sql)
     dane = c.fetchall()
@@ -79,7 +79,7 @@ def get_user_last_location(user_id, game_id):
     return last_location  # list
 
 
-def set_user_location(user_id, game_id, latitude, longitude):
+def set_location(user_id, game_id, latitude, longitude):
     time = datetime.now()
     sql = f"INSERT INTO location_events (user_id, game_id, event_time, latitude, longitude, event_type) VALUES ({user_id}, {game_id}, '{time}', {latitude}, {longitude}, 6);"
     c.execute(sql)
