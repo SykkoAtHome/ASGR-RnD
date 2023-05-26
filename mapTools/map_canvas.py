@@ -10,6 +10,7 @@ from mpl_toolkits.basemap import Basemap
 
 tile_limit = 100
 
+
 def deg2num(latitude, longitude, zoom):
     C = (256/(2*math.pi)) * 2**zoom
 
@@ -17,6 +18,7 @@ def deg2num(latitude, longitude, zoom):
     y = C*(math.pi-math.log(math.tan((math.pi/4) + math.radians(latitude)/2)))
 
     return x, y
+
 
 def oom_deg2num(lat_deg, lon_deg, zoom):
     lat_rad = math.radians(lat_deg)
@@ -41,7 +43,6 @@ def set_bounding_box(dataframe):
     bbox_list.append(dataframe['lon'].max())
     bbox_list.append(dataframe['lon'].min())
     return bbox_list
-
 
 
 def canvas_size(user_id, game_id, zoom):
@@ -74,8 +75,6 @@ def canvas_size(user_id, game_id, zoom):
     return columns * 256, rows * 256, columns, rows, aspect_ratio, numberOfTiles
 
 
-
-
 def map_canvas(user_id, game_id, zoom):
     payload = {}
     headers = {
@@ -96,9 +95,14 @@ def map_canvas(user_id, game_id, zoom):
     x0, y0 = deg2num(top, left, zoom)
     x1, y1 = deg2num(bottom, right, zoom)
 
+
+
     #  calculates tiles
     x0_tile, y0_tile = math.floor(x0 / 256), math.floor(y0 / 256)
     x1_tile, y1_tile = math.ceil(x1 / 256), math.ceil(y1 / 256)
+    # print(x0_tile, y0_tile)
+    # print(x1_tile, y1_tile)
+
     numberOfTiles = (x0_tile - x1_tile) * (y0_tile - y1_tile)
     # calculate columns and rows
     columns = (x1_tile - x0_tile)
@@ -120,7 +124,7 @@ def map_canvas(user_id, game_id, zoom):
 
 
 
-    # Crop to fit location data
+    # #Crop to fit location data
     # x, y = x0_tile * 256, y0_tile * 256
     # canvas = canvas.crop((
     #     int(x0 - x),  # left
@@ -129,6 +133,7 @@ def map_canvas(user_id, game_id, zoom):
     #     int(y1 - y)))  # bottom
 
     return canvas
+
 
 def tile_corners_to_latlon(xtile, ytile, zoom):
     n = 2.0 ** zoom
@@ -153,56 +158,50 @@ def tile_corners_to_latlon(xtile, ytile, zoom):
 def plot_points(user_id, game_id, zoom):
     canvas_bg = canvas_size(user_id, game_id, zoom)  # width, height, columns, rows, aspect ratio
     columns, rows = canvas_bg[2], canvas_bg[3]
+    aspect_ratio = rows / columns
+
 
     pd.set_option('display.float_format', '{:.8f}'.format)
     locationData = user.location_data(user_id, game_id)  # Dictionary
-    latitudeData = locationData['lat']
-    longitudeData = locationData['lon']
-    mercatorData = [deg2num(lat, lon, zoom) for lat, lon in zip(latitudeData, longitudeData)]
-    mercatorX = [mx for mx, _ in mercatorData]
-    mercatorY = [my for _, my in mercatorData]
-    locationData["mx"] = mercatorX
-    locationData["my"] = mercatorY
+
+
     dataframe = pd.DataFrame(data=locationData)
 
     top, bottom, right, left = set_bounding_box(dataframe)
+    topMerc, leftMerc = oom_deg2num(top, left, zoom)
+    upperLeftX, upperLeftY = topMerc, leftMerc
+    bottomLeftX, bottomLeftY = upperLeftX, upperLeftY+rows-1
+    upperRightA, upperRightB = upperLeftX+columns-1, bottomLeftY-1
 
-    top_map, left_map = oom_deg2num(top, left, zoom)
+    llcrnrlon, llcrnrlat = tile_corners_to_latlon(bottomLeftX, bottomLeftY, zoom)[2]
+    urcrnrlon, urcrnrlat = tile_corners_to_latlon(upperRightA, upperRightB, zoom)[1]
+    print(llcrnrlon, llcrnrlat)
+    print(urcrnrlon, urcrnrlat)
+
+    m = Basemap(llcrnrlon=20.968780517578125, llcrnrlat=52.308478623663355, urcrnrlon=20.979766845703125, urcrnrlat=52.31015787939095, resolution='l')
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, aspect=aspect_ratio)
+    fig.patch.set_alpha(0.0)
+
+    x, y = m(locationData['lon'], locationData['lat'])
+    ax.scatter(x, y, c='green', marker='o', s=100, alpha=0.5)
+    buf = BytesIO()
+    fig.savefig(buf, format='png', transparent=True, bbox_inches='tight', pad_inches=0)
+    buf.seek(0)
+    plt.axis('equal')
+    # plt.axis('off')
+    # return fig
 
 
-    bottom_map, right_map = oom_deg2num(bottom, right, zoom)
-    bottom_map_new, right_map_new = oom_num2deg(bottom_map, right_map, zoom)
-
-
-
-
-
-
-
-    # m = Basemap(llcrnrlon=left_plot, llcrnrlat=bottom_plot, urcrnrlon=right_plot, urcrnrlat=top_plot, resolution='l')
-    #
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111)
-    # fig.patch.set_alpha(0.0)
-    #
-    # for lat, lon in zip(locationData['lat'], locationData['lon']):
-    #     x, y = m(lon, lat)
-    #     m.plot(x, y, 'ro', markersize=10, alpha=0.5)  # Dodaj alpha, aby ustawić przezroczystość
-
-
-
-
-    #plt.axis('off')
-    #plt.show()
-    #return plot_image
 
 
 
 
 plot_points(1,1,18)
+plt.show()
 
-
-# mapa = map_canvas(1,1,18)
+# mapa = map_canvas(1,1,16)
 # plt.imshow(mapa)
 # plt.axis('off')
 # plt.show()
