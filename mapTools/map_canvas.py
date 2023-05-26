@@ -18,6 +18,21 @@ def deg2num(latitude, longitude, zoom):
 
     return x, y
 
+def oom_deg2num(lat_deg, lon_deg, zoom):
+    lat_rad = math.radians(lat_deg)
+    n = 2.0 ** zoom
+    xtile = int((lon_deg + 180.0) / 360.0 * n)
+    ytile = int((1.0 - math.asinh(math.tan(lat_rad)) / math.pi) / 2.0 * n)
+    return (xtile, ytile)
+
+
+def oom_num2deg(xtile, ytile, zoom):
+    n = 2.0 ** zoom
+    lon_deg = xtile / n * 360.0 - 180.0
+    lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * ytile / n)))
+    lat_deg = math.degrees(lat_rad)
+    return (lat_deg, lon_deg)
+
 
 def set_bounding_box(dataframe):
     bbox_list = []
@@ -26,6 +41,8 @@ def set_bounding_box(dataframe):
     bbox_list.append(dataframe['lon'].max())
     bbox_list.append(dataframe['lon'].min())
     return bbox_list
+
+
 
 def canvas_size(user_id, game_id, zoom):
     dataframe = pd.DataFrame(data=user.location_data(user_id, game_id))
@@ -113,9 +130,30 @@ def map_canvas(user_id, game_id, zoom):
 
     return canvas
 
+def tile_corners_to_latlon(xtile, ytile, zoom):
+    n = 2.0 ** zoom
+    lon_deg = xtile / n * 360.0 - 180.0
+    lat_rad_nw = math.atan(math.sinh(math.pi * (1 - 2 * (ytile / n))))
+    lat_deg_nw = math.degrees(lat_rad_nw)
+
+    lat_rad_se = math.atan(math.sinh(math.pi * (1 - 2 * ((ytile + 1) / n))))
+    lat_deg_se = math.degrees(lat_rad_se)
+
+    lat_deg_nw = max(min(lat_deg_nw, 85.0511), -85.0511)
+    lat_deg_se = max(min(lat_deg_se, 85.0511), -85.0511)
+
+    top_left = (lat_deg_nw, lon_deg)
+    top_right = (lat_deg_nw, lon_deg + (360.0 / n))
+    bottom_right = (lat_deg_se, lon_deg + (360.0 / n))
+    bottom_left = (lat_deg_se, lon_deg)
+
+    return top_left, top_right, bottom_left, bottom_right
+
 
 def plot_points(user_id, game_id, zoom):
     canvas_bg = canvas_size(user_id, game_id, zoom)  # width, height, columns, rows, aspect ratio
+    columns, rows = canvas_bg[2], canvas_bg[3]
+
     pd.set_option('display.float_format', '{:.8f}'.format)
     locationData = user.location_data(user_id, game_id)  # Dictionary
     latitudeData = locationData['lat']
@@ -125,10 +163,15 @@ def plot_points(user_id, game_id, zoom):
     mercatorY = [my for _, my in mercatorData]
     locationData["mx"] = mercatorX
     locationData["my"] = mercatorY
-
     dataframe = pd.DataFrame(data=locationData)
 
-    
+    top, bottom, right, left = set_bounding_box(dataframe)
+
+    top_map, left_map = oom_deg2num(top, left, zoom)
+
+
+    bottom_map, right_map = oom_deg2num(bottom, right, zoom)
+    bottom_map_new, right_map_new = oom_num2deg(bottom_map, right_map, zoom)
 
 
 
@@ -136,6 +179,22 @@ def plot_points(user_id, game_id, zoom):
 
 
 
+    # m = Basemap(llcrnrlon=left_plot, llcrnrlat=bottom_plot, urcrnrlon=right_plot, urcrnrlat=top_plot, resolution='l')
+    #
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111)
+    # fig.patch.set_alpha(0.0)
+    #
+    # for lat, lon in zip(locationData['lat'], locationData['lon']):
+    #     x, y = m(lon, lat)
+    #     m.plot(x, y, 'ro', markersize=10, alpha=0.5)  # Dodaj alpha, aby ustawić przezroczystość
+
+
+
+
+    #plt.axis('off')
+    #plt.show()
+    #return plot_image
 
 
 
