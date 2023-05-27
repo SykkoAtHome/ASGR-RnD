@@ -161,12 +161,8 @@ def plot_points(user_id, game_id, zoom):
     columns, rows = canvas_bg[2], canvas_bg[3]
     aspect_ratio = columns/rows
 
-
-
-
     pd.set_option('display.float_format', '{:.8f}'.format)
     locationData = user.location_data(user_id, game_id)  # Dictionary
-
 
     dataframe = pd.DataFrame(data=locationData)
 
@@ -175,7 +171,6 @@ def plot_points(user_id, game_id, zoom):
     upperLeftX, upperLeftY = topMerc, leftMerc
     bottomLeftX, bottomLeftY = upperLeftX, upperLeftY+rows-1
     upperRightA, upperRightB = upperLeftX+columns-1, bottomLeftY-rows+1
-
 
     llcrnrlat, llcrnrlon = tile_corners_to_latlon(bottomLeftX, bottomLeftY, zoom)[2]
     urcrnrlat, urcrnrlon = tile_corners_to_latlon(upperRightA, upperRightB, zoom)[1]
@@ -204,14 +199,3 @@ def plot_points(user_id, game_id, zoom):
     plt.axis('off')
 
     fig.savefig('points.png', transparent=True, bbox_inches='tight', pad_inches=0)
-
-
-
-plot_points(1,1,18)
-plt.show()
-
-# mapa = map_canvas(1,1,18)
-# plt.imshow(mapa)
-# plt.axis('off')
-# mapa.save('mapBG.png', format='PNG')
-# plt.show()

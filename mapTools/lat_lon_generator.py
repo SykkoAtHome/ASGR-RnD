@@ -7,10 +7,10 @@ from datetime import datetime
 
 userID = 1  # test user = 1
 gameID = 1  # test game = 1
-gameTotalTime = 60  # in minutes
+gameTotalTime = 240  # in minutes
 latStart = 52.310386
 lonStart = 20.973477
-radius_meters = 100  # in meters
+radius_meters = 1000  # in meters
 
 date = datetime.now().timestamp()  # Do not touch !
 dateStart = date  # Do not touch !
