@@ -112,6 +112,7 @@ def map_canvas(user_id, game_id, zoom):
     # calculate canvas size (list)
     canvas_size = (columns*256, rows*256)
 
+
     # create empty canvas
     canvas = Image.new("RGB", canvas_size)
     for x_tile, y_tile in product(range(x0_tile, x1_tile), range(y0_tile, y1_tile)):
@@ -158,7 +159,9 @@ def tile_corners_to_latlon(xtile, ytile, zoom):
 def plot_points(user_id, game_id, zoom):
     canvas_bg = canvas_size(user_id, game_id, zoom)  # width, height, columns, rows, aspect ratio
     columns, rows = canvas_bg[2], canvas_bg[3]
-    aspect_ratio = rows / columns
+    aspect_ratio = columns/rows
+
+
 
 
     pd.set_option('display.float_format', '{:.8f}'.format)
@@ -171,37 +174,44 @@ def plot_points(user_id, game_id, zoom):
     topMerc, leftMerc = oom_deg2num(top, left, zoom)
     upperLeftX, upperLeftY = topMerc, leftMerc
     bottomLeftX, bottomLeftY = upperLeftX, upperLeftY+rows-1
-    upperRightA, upperRightB = upperLeftX+columns-1, bottomLeftY-1
+    upperRightA, upperRightB = upperLeftX+columns-1, bottomLeftY-rows+1
 
-    llcrnrlon, llcrnrlat = tile_corners_to_latlon(bottomLeftX, bottomLeftY, zoom)[2]
-    urcrnrlon, urcrnrlat = tile_corners_to_latlon(upperRightA, upperRightB, zoom)[1]
-    print(llcrnrlon, llcrnrlat)
-    print(urcrnrlon, urcrnrlat)
 
-    m = Basemap(llcrnrlon=20.968780517578125, llcrnrlat=52.308478623663355, urcrnrlon=20.979766845703125, urcrnrlat=52.31015787939095, resolution='l')
+    llcrnrlat, llcrnrlon = tile_corners_to_latlon(bottomLeftX, bottomLeftY, zoom)[2]
+    urcrnrlat, urcrnrlon = tile_corners_to_latlon(upperRightA, upperRightB, zoom)[1]
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111, aspect=aspect_ratio)
-    fig.patch.set_alpha(0.0)
+    llcrnrlat, urcrnrlat, llcrnrlon, urcrnrlon = \
+        round(llcrnrlat, 6), round(urcrnrlat, 6), round(llcrnrlon, 6), round(urcrnrlon, 6)
+
+    print(columns, rows)
+    fig = plt.figure(figsize=(columns, rows), dpi=256)
+
+    ax = fig.add_subplot(111)
+
+    m = Basemap(llcrnrlat=llcrnrlat,
+                urcrnrlat=urcrnrlat,
+                llcrnrlon=llcrnrlon,
+                urcrnrlon=urcrnrlon,
+                resolution="l")
 
     x, y = m(locationData['lon'], locationData['lat'])
-    ax.scatter(x, y, c='green', marker='o', s=100, alpha=0.5)
-    buf = BytesIO()
-    fig.savefig(buf, format='png', transparent=True, bbox_inches='tight', pad_inches=0)
-    buf.seek(0)
-    plt.axis('equal')
-    # plt.axis('off')
-    # return fig
+    m.scatter(x, y, c='red', marker='o', s=50, alpha=0.7)
+    #ax.set_aspect(aspect_ratio)
+    plt.gca().set_aspect(aspect_ratio)
 
+    fig.tight_layout(rect=[0, 0, 1, 1])
+    #plt.axis('equal')
+    plt.axis('off')
 
-
+    fig.savefig('points.png', transparent=True, bbox_inches='tight', pad_inches=0)
 
 
 
 plot_points(1,1,18)
 plt.show()
 
-# mapa = map_canvas(1,1,16)
+# mapa = map_canvas(1,1,18)
 # plt.imshow(mapa)
 # plt.axis('off')
+# mapa.save('mapBG.png', format='PNG')
 # plt.show()
