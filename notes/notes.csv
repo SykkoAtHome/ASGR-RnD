@@ -1,3 +1,4 @@
+userData
 Function name;input data;Function decription
 location_data;user_id, game_id;Returns dictionary with keys: lat, lon, timestamp as string, user_id, game_id. Values as lists
 get_name;user_id;Returns Username
@@ -16,63 +17,3 @@ def plot_points(user_id, game_id, zoom):
     canvas_bg = canvas_size(user_id, game_id, zoom)  # width, height, columns, rows, aspect ratio
     columns, rows = canvas_bg[2], canvas_bg[3]
     aspect_ratio = rows/columns
-
-
-
-    pd.set_option('display.float_format', '{:.8f}'.format)
-    locationData = user.location_data(user_id, game_id)  # Dictionary
-    latitudeData = locationData['lat']
-    longitudeData = locationData['lon']
-    mercatorData = [deg2num(lat, lon, zoom) for lat, lon in zip(latitudeData, longitudeData)]
-    mercatorX = [mx for mx, _ in mercatorData]
-    mercatorY = [my for _, my in mercatorData]
-    locationData["mx"] = mercatorX
-    locationData["my"] = mercatorY
-    dataframe = pd.DataFrame(data=locationData)
-    top, bottom, right, left = set_bounding_box(dataframe)
-    topMerc, leftMerc = oom_deg2num(top, left, zoom)
-    bottomMerc, rightMerc = oom_deg2num(bottom, right, zoom)
-    llcrnrlonMerc, llcrnrlatMerc = topMerc,leftMerc+(rows-1)
-    llcrnrlat, llcrnrlon = tile_corners_to_latlon(llcrnrlonMerc, llcrnrlatMerc, zoom)[2]
-    urcrnrlatMerc, urcrnrlonMerc = bottomMerc, rightMerc-rows+1
-    urcrnrlat, urcrnrlon = tile_corners_to_latlon(urcrnrlatMerc, urcrnrlonMerc, zoom)[1]
-
-
-    m = Basemap(llcrnrlon=llcrnrlon, llcrnrlat=llcrnrlat, urcrnrlon=urcrnrlon, urcrnrlat=urcrnrlat, resolution='l')
-
-    fig = plt.figure()
-    ax = fig.add_subplot(111, aspect=aspect_ratio)
-    fig.patch.set_alpha(0.0)
-
-    x, y = m(locationData['lon'], locationData['lat'])
-    ax.scatter(x, y, c='red', marker='o', s=100, alpha=0.5)
-    buf = BytesIO()
-    fig.savefig(buf, format='png', transparent=True, bbox_inches='tight', pad_inches=0)
-    buf.seek(0)
-    plt.axis('equal')
-    plt.axis('off')
-    return fig
-
-
-
-
-52.312165 52.308682 20.978608 20.969188 plot
-52.312165 52.308682 20.978608 20.969188 map
-
-plot
-36585 21554
-36587 21555
-
-map
-9365842.990057245 5518055.002376541
-9366281.993875911 5518320.498050703
-
-52.308478623663355 20.9674072265625
-
-
-52.308478623663355 20.9674072265625
-52.315195264379575 20.98388671875
-
-52.308478623663355 20.968780517578125
-52.31015787939095 20.979766845703125
-
