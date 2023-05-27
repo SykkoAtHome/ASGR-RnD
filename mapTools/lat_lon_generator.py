@@ -7,10 +7,10 @@ from datetime import datetime
 
 userID = 1  # test user = 1
 gameID = 1  # test game = 1
-gameTotalTime = 1  # in minutes
-latStart = 52.333883
-lonStart = 21.269739
-radius_meters = 5  # in meters
+gameTotalTime = 60  # in minutes
+latStart = 52.310386
+lonStart = 20.973477
+radius_meters = 100  # in meters
 
 date = datetime.now().timestamp()  # Do not touch !
 dateStart = date  # Do not touch !
@@ -48,21 +48,29 @@ while True:
     dateTickNew = float(dateTickNew[:-6] + milliseconds)
 
     fakeDateList.append(dateTickNew)
+    time_end = dateTickNew
 
     if fakeDateList[len(fakeDateList) - 1] >= dateEnd:
         break
 
 
 def generate_random_coords(lat, lon, radius):
+    tick_count = 1
     for timestamp in fakeDateList:
         time = datetime.fromtimestamp(timestamp)
 
         latitude = round(random.uniform(lat - radius, lat + radius), 7)
-        longitude = round(random.uniform(lon - radius, lon + radius), 7)
+        longitude = round(random.uniform(lon - radius, lon + radius*2), 7)
 
         c.execute(
-            f"INSERT INTO location_events (user_id, game_id, event_time, latitude, longitude, event_type) VALUES ({userID}, {gameID}, '{time}', '{latitude}', '{longitude}', 6);")
+            f"INSERT INTO location_events "
+            f"(user_id, game_id, event_time, latitude, longitude, event_type, tick_count)"
+            f" VALUES ({userID}, {gameID}, '{time}', '{latitude}', '{longitude}', 6, {tick_count});")
 
+        tick_count += 1
+    print(f"Ticks: {tick_count}\n"
+          f"Time Start: {datetime.fromtimestamp(date)}\n"
+          f"Time End: {datetime.fromtimestamp(time_end)}")
 
 generate_random_coords(latStart, lonStart, radius_degrees)
 conn.commit()

@@ -1,5 +1,6 @@
 from db import c, conn
 from datetime import datetime
+import pandas as pd
 
 
 def location_data(user_id, game_id):
@@ -41,6 +42,32 @@ def location_data(user_id, game_id):
     else:
         conn.close()
         return "Either user_id or game_id does not exist."
+
+
+def generate_user_heatmap_data(user_id, game_id, resolution):
+    dataframe = pd.DataFrame(data=location_data(user_id, game_id))
+
+    rounded_data = dataframe.round({"lat": resolution, "lon": resolution})
+    rounded_data["count"] = 1
+
+    grouped_data = rounded_data.groupby(["lat", "lon"]).count().reset_index()
+
+    heatmap_data = {
+        "lat": [],
+        "lon": [],
+        "count": []
+    }
+
+    for index, row in grouped_data.iterrows():
+        lat = row["lat"]
+        lon = row["lon"]
+        count = row["count"]
+
+        heatmap_data["lat"].append(lat)
+        heatmap_data["lon"].append(lon)
+        heatmap_data["count"].append(int(count))
+
+    return heatmap_data
 
 
 def get_name(user_id):
@@ -85,5 +112,10 @@ def set_location(user_id, game_id, latitude, longitude):
     sql = f"INSERT INTO location_events (user_id, game_id, event_time, latitude, longitude, event_type) VALUES ({user_id}, {game_id}, '{time}', {latitude}, {longitude}, 6);"
     c.execute(sql)
     conn.close()
+
+
+
+hm = generate_user_heatmap_data(1,1,7)
+print(hm)
 
 
