@@ -1,7 +1,12 @@
-from multiprocessing import Queue
-import geoplotlib
-from geoplotlib.utils import read_csv
+import userData.userData as user
+import plotly.express as px
 
-data = read_csv("sample_data.csv")
-geoplotlib.dot(data,point_size=3)
-geoplotlib.show()
+points = user.location_data(1,1)
+
+fig = px.scatter_mapbox(points, lat="lat", lon="lon",
+                        color_discrete_sequence=["red"], zoom=18)
+fig.update_layout(mapbox_style="open-street-map")
+fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+fig.update_traces(marker={'size': 15})
+fig.show()
+

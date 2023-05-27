@@ -13,7 +13,7 @@ set_bounding_box;pandas dataframe;Settings top, bottom, left and right boundarie
 map_canvas;user_id, game_id, zoom;Returns RAW Map (PIL Image) from tiles (OpenStreetMap) based on user in-game locations data. Map is not cropped to fit location data.
 plot_points;user_id, game_id, zoom;Returns Figure
 
-def plot_points(user_id, game_id, zoom):
-    canvas_bg = canvas_size(user_id, game_id, zoom)  # width, height, columns, rows, aspect ratio
-    columns, rows = canvas_bg[2], canvas_bg[3]
-    aspect_ratio = rows/columns
+marker=dict(color='LightSkyBlue',size=120,line=dict(color='MediumPurple',width=12))
+
+
+
